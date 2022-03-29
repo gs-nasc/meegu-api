@@ -26,6 +26,7 @@
     "@nestjs/platform-express": "^7.0.0",
     "@nestjs/typeorm": "^7.1.4",
     "aws-sdk": "^2.786.0",
+    "axios": "^0.26.1",
     "bcrypt": "^5.0.0",
     "class-transformer": "^0.4.0",
     "class-validator": "^0.12.2",

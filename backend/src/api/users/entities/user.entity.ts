@@ -62,13 +62,14 @@ export class UserEntity implements User {
 
     @CreateDateColumn({
         type: "timestamp",
-        nullable: false
+        nullable: false,
     })
     createdAt: Date;
 
     @UpdateDateColumn({
         type: "timestamp",
-        nullable: false
+        nullable: true,
+        default: null
     })
     updatedAt: Date;
 

@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/shared/guards/auth.guard';
 
 import { User } from './interfaces/user.interface';
 import { UsersService } from './users.service';
@@ -9,8 +10,8 @@ export class UsersController {
     constructor(private usersService: UsersService) { }
 
     @Get()
-    async findAll(): Promise<User[]> {
-        return await this.usersService.findAll();
+    async find(@Query("name") name: string): Promise<User[]> {
+        return (name != null && name != undefined) ? await this.usersService.findByName(name) : await this.usersService.findAll();
     }
 
     @Get(":id")
@@ -28,12 +29,9 @@ export class UsersController {
         return await this.usersService.update(id, user);
     }
 
-    @Get("?")
-    async findByName(@Query("name") name: string): Promise<User> {
-        return await this.usersService.findByName(name);
-    }
 
     @Delete(":id")
+    @UseGuards(AuthGuard)
     async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
         return await this.usersService.delete(id);
     }

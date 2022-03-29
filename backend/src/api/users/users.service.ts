@@ -1,6 +1,8 @@
-import { BadRequestException, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CepService } from '../cep/cep.service';
+import { CEP } from '../cep/interface/cep.interface';
 
 import { UserEntity } from './entities/user.entity';
 import { User } from './interfaces/user.interface';
@@ -9,7 +11,7 @@ import Util from './users.util';
 @Injectable()
 export class UsersService {
 
-    constructor(@InjectRepository(UserEntity) private userRepository: Repository<UserEntity>) { }
+    constructor(@InjectRepository(UserEntity) private userRepository: Repository<UserEntity>, private cepService: CepService) { }
 
     /**
      * Find all users
@@ -35,8 +37,8 @@ export class UsersService {
      * @param name User name
      * @returns {Promise<User>}
      */
-    async findByName(name: string): Promise<User> {
-        const user = await this.userRepository.findOne({ name });
+    async findByName(name: string): Promise<User[]> {
+        const user = await this.userRepository.createQueryBuilder('user').where('user.name LIKE :name', { name: `%${name}%` }).getMany();
         if(user == undefined || user == null) throw new UnprocessableEntityException('User not found');
         return user;
     }
@@ -59,8 +61,17 @@ export class UsersService {
     async create(user: User): Promise<User> {
         Util.check(user);
 
-        const userEntity = this.userRepository.create(user);
-        return userEntity;
+        const cep: CEP = await this.cepService.getCep(user.zipcode.toString());
+
+        user = {
+            ...user,
+            state: cep.uf,
+            city: cep.localidade,
+            neighborhood: cep.bairro,
+            street: cep.logradouro,
+        }
+
+        return await this.userRepository.insert(user).then(() => user);
     }
 
     /**
