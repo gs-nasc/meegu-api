@@ -1,4 +1,4 @@
-import { BadRequestException, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, NotAcceptableException, UnauthorizedException } from "@nestjs/common";
 
 const Util = {
     /**
@@ -10,6 +10,8 @@ const Util = {
         if(user.name.trim().length < 2 || user.name.trim().length > 100) throw new BadRequestException('Name must be between 2 and 100 characters');
         if(user.birthdate == undefined || user.name == null) throw new BadRequestException('Birthdate is required');
         if(Util.age(user.birthdate) < 18) throw new UnauthorizedException('You must be older than 18 years');
+        if(user.acceptedTerms == undefined || user.acceptedTerms == null) throw new BadRequestException('Accepted terms is required');
+        if(!user.acceptedTerms) throw new NotAcceptableException('You must accept the terms');
     },
     /**
      * Calculate the age of a user
